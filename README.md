@@ -1,2 +1,3 @@
 # nba_comeback
-Analysis of NBA win probabilities minute-by-minute
+Analysis of NBA win probabilities (ongoing project)
+
