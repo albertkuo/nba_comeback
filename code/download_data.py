@@ -5,6 +5,8 @@
 #
 # Download NBA data using NBA API https://github.com/swar/nba_api
 
+# Need to fix read timeout issue: https://github.com/swar/nba_api/blob/master/docs/nba_api/stats/examples.md
+
 # Modules
 # reticulate::repl_python() # Run Python in Console, type "exit" to exit session
 # Alternatively, run interactively in Terminal window (type "python")
@@ -20,6 +22,7 @@ nba_team_ids = [team["id"] for team in nba_teams]
 # Get season names since 2000/last season not scraped
 from datetime import datetime
 from pathlib import Path
+import time
 year_min = 2000
 last_year_scraped = 2020
 current_year = datetime.today().year
@@ -35,18 +38,18 @@ season_range = [str(year) + "-" +str(year+1)[2:4] for year in year_range]
 
 # Get game IDs
 from nba_api.stats.endpoints import leaguegamefinder
-from nba_api.stats.library.parameters import Season
-from nba_api.stats.library.parameters import SeasonAll
 from nba_api.stats.library.parameters import SeasonType
 
 # Regular season game IDs
 game_ids_regular = []
 for season in season_range:
+  print(season)
   for team_id in nba_team_ids:
     print(team_id)
     gamefinder = leaguegamefinder.LeagueGameFinder(team_id_nullable = team_id,
     season_nullable = season,
-    season_type_nullable = SeasonType.regular)
+    season_type_nullable = SeasonType.regular,
+    timeout = 300)
     
     games_dict = gamefinder.get_normalized_dict()
     games = games_dict["LeagueGameFinderResults"]
@@ -73,7 +76,8 @@ for season in season_range:
   for team_id in nba_team_ids:
     gamefinder = leaguegamefinder.LeagueGameFinder(team_id_nullable = team_id,
     season_nullable = season,
-    season_type_nullable = "Playoffs")
+    season_type_nullable = "Playoffs",
+    timeout = 30)
     
     games_dict = gamefinder.get_normalized_dict()
     games = games_dict["LeagueGameFinderResults"]
