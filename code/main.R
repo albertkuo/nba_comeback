@@ -29,11 +29,28 @@ if(file.exists(here("./data/game_ids.txt"))){
 game_ids_regular = setdiff(game_ids_regular, game_ids_previous)
 game_ids_playoffs = setdiff(game_ids_playoffs, game_ids_previous)
 message("Scraping ", length(game_ids_regular), " regular season games and ",
-        length(game_ids_playoffs), " playoff games.")
+        length(game_ids_playoffs), " playoff games")
 
 ## Get play by play for every game ID
-game_id = "0041000206"
-get_play_by_play(game_id)
+game_id = "0041000206" # Note game_id = "1421200014" is empty
+empty_games = 0
+games_regular = vector(mode = "list", length = length(game_ids_regular))
+for(i in seq_along(game_ids_regular[1:100])){
+  if(i %% 10 == 0){
+    message("Scraped ", i, " out of ", length(game_ids_regular), " games...")
+  }
+
+  game_id = game_ids_regular[[i]]
+  games_regular[[i]] = get_play_by_play(game_id)
+
+  # Count number of games that were not found
+  if(is.null(games_regular[[i]]))
+    empty_games = empty_games + 1
+}
+
+message("Failed to scrape ", empty_games, " out of ", length(game_ids_regular), " regular season games")
+
+
 
 
 # Save game IDs that have been scraped

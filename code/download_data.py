@@ -63,8 +63,8 @@ def get_game_ids():
   game_ids_regular = list(set(game_ids_regular))
   
   # Save last year that had a game ID scraped
-  with open("./data/last_year_scraped.txt", "w") as file:
-    file.write(str(last_year_scraped))
+  # with open("./data/last_year_scraped.txt", "w") as file:
+  #   file.write(str(last_year_scraped))
 
   # Playoffs game IDs
   game_ids_playoffs = []
@@ -91,6 +91,8 @@ def get_play_by_play(game_id):
   # game_id = "0041000206" # example game ID
   df = playbyplay.PlayByPlay(game_id).get_data_frames()[0]
   time.sleep(1)
+  
+  if(df.empty): return None
   
   # Select rows with scores
   df = df.loc[df["SCORE"].notnull()]
