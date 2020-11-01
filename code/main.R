@@ -1,7 +1,7 @@
 # main.R
 # -----------------------------------------------------------------------------
 # Author:             Albert Kuo
-# Date last modified: Oct 30, 2020
+# Date last modified: Nov 1, 2020
 #
 # Main script for analysis
 
@@ -32,6 +32,7 @@ message("Scraping ", length(game_ids_regular), " regular season games and ",
         length(game_ids_playoffs), " playoff games.")
 
 ## Get play by play for every game ID
+game_id = "0041000206"
 get_play_by_play(game_id)
 
 

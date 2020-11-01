@@ -1,14 +1,14 @@
 # download_data.R
 # -----------------------------------------------------------------------------
 # Author:             Albert Kuo
-# Date last modified: Oct 31, 2020
+# Date last modified: Nov 1, 2020
 #
 # Download NBA data using NBA API https://github.com/swar/nba_api
 # https://github.com/swar/nba_api/blob/master/docs/examples/PlayByPlay.ipynb
 # Need to fix read timeout issue: https://github.com/swar/nba_api/blob/master/docs/nba_api/stats/examples.md
 
 # Modules
-# reticulate::repl_python() # Run Python in Console, type "exit" to exit session
+# reticulate::repl_python() # Run Python in Console, type "exit" or "quit" to exit session
 # Alternatively, run interactively in Terminal window (type "python")
 import nba_api
 import time
@@ -84,13 +84,21 @@ def get_game_ids():
   game_ids_all = [game_ids_regular, game_ids_playoffs]
   return game_ids_all
 
-
 # Get play by play for every game, team, season
 # Play by play data
+from nba_api.stats.endpoints import playbyplay
 def get_play_by_play(game_id):
-  from nba_api.stats.endpoints import playbyplay
-  print(game_id)
+  # game_id = "0041000206" # example game ID
   df = playbyplay.PlayByPlay(game_id).get_data_frames()[0]
   time.sleep(1)
   
-  df.head() # just looking at the head of the data
+  # Select rows with scores
+  df = df.loc[df["SCORE"].notnull()]
+  
+  # Clean up columns
+  df[["minute", "second"]] = df["PCTIMESTRING"].str.split(":", expand = True).astype(int)
+  df[["left_score", "right_score"]] = df["SCORE"].str.split(" - ", expand = True).astype(int)
+  df = df.loc[:, ["PERIOD", "minute", "second", "left_score", "right_score"]]
+  
+  # Return data frame of time left and scores
+  return df
