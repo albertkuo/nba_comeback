@@ -100,7 +100,8 @@ def get_play_by_play(game_id):
   # Clean up columns
   df[["minute", "second"]] = df["PCTIMESTRING"].str.split(":", expand = True).astype(int)
   df[["left_score", "right_score"]] = df["SCORE"].str.split(" - ", expand = True).astype(int)
-  df = df.loc[:, ["PERIOD", "minute", "second", "left_score", "right_score"]]
-  
+  df.rename(columns = {"PERIOD":"period"}, inplace = True)
+  df = df.loc[:, ["period", "minute", "second", "left_score", "right_score"]]
+    
   # Return data frame of time left and scores
   return df
