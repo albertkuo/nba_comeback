@@ -9,6 +9,7 @@
 # Packages
 library(reticulate)
 library(here)
+library(tictoc)
 source_python(here("./code/download_data.py")) # Call Python script to use NBA API
 
 # Download data
@@ -31,26 +32,47 @@ game_ids_playoffs = setdiff(game_ids_playoffs, game_ids_previous)
 message("Downloading ", length(game_ids_regular), " regular season games and ",
         length(game_ids_playoffs), " playoff games")
 
-## Get play by play for every game ID
+## Get play by play for every regular season game
 game_id = "0041000206" # Note game_id = "1421200014" is empty
 empty_games = 0
 games_regular = vector(mode = "list", length = length(game_ids_regular))
-for(i in seq_along(game_ids_regular[1:100])){
-  if(i %% 10 == 0){
+tic("Download regular season games")
+for(i in seq_along(game_ids_regular)){
+  if(i %% 100 == 0){
     message("Downloaded ", i, " out of ", length(game_ids_regular), " games...")
   }
 
   game_id = game_ids_regular[[i]]
-  games_regular[[i]] = get_play_by_play(game_id)
+  games_regular[[i]] = tryCatch({get_play_by_play(game_id)}, error = function(e) return(NULL))
 
   # Count number of games that were not found
   if(is.null(games_regular[[i]]))
     empty_games = empty_games + 1
 }
-
+toc()
 message("Failed to download ", empty_games, " out of ", length(game_ids_regular), " regular season games")
+saveRDS(games_regular, here("./data/games_regular.rds"))
 
+## Get play by play for every playoffs game
+empty_games = 0
+games_playoffs = vector(mode = "list", length = length(game_ids_playoffs))
+tic("Download playoff games")
+for(i in seq_along(game_ids_playoffs)){
+  if(i %% 100 == 0){
+    message("Downloaded ", i, " out of ", length(game_ids_playoffs), " games...")
+  }
 
+  game_id = game_ids_playoffs[[i]]
+  games_playoffs[[i]] = tryCatch({get_play_by_play(game_id)}, error = function(e) return(NULL))
+
+  # Count number of games that were not found
+  if(is.null(games_playoffs[[i]]))
+    empty_games = empty_games + 1
+}
+toc()
+
+message("Failed to download ", empty_games, " out of ", length(game_ids_playoffs), " playoff games")
+saveRDS(games_playoffs, here("./data/games_playoffs.rds"))
 
 
 # Save game IDs that have been scraped
