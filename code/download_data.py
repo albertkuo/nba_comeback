@@ -46,7 +46,7 @@ def get_game_ids():
     print(season)
     gamefinder = leaguegamefinder.LeagueGameFinder(season_nullable = season,
     season_type_nullable = SeasonType.regular, timeout = 10) 
-    time.sleep(1) # Slow down request frequency to 1 per second
+    time.sleep(0.5) # Slow down request frequency
     
     games_dict = gamefinder.get_normalized_dict()
     games = games_dict["LeagueGameFinderResults"]
@@ -71,7 +71,7 @@ def get_game_ids():
   for season in season_range:
     gamefinder = leaguegamefinder.LeagueGameFinder(season_nullable = season,
     season_type_nullable = "Playoffs", timeout = 10)
-    time.sleep(1) # Slow down request frequency to 1 per second
+    time.sleep(0.5) # Slow down request frequency
     
     games_dict = gamefinder.get_normalized_dict()
     games = games_dict["LeagueGameFinderResults"]
@@ -90,7 +90,7 @@ from nba_api.stats.endpoints import playbyplay
 def get_play_by_play(game_id):
   # game_id = "0041000206" # example game ID
   df = playbyplay.PlayByPlay(game_id).get_data_frames()[0]
-  time.sleep(1)
+  time.sleep(0.5)
   
   if(df.empty): return None
   
