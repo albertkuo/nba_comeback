@@ -70,12 +70,24 @@ for(i in seq_along(game_ids_playoffs)){
     empty_games = empty_games + 1
 }
 toc()
-
 message("Failed to download ", empty_games, " out of ", length(game_ids_playoffs), " playoff games")
 saveRDS(games_playoffs, here("./data/games_playoffs.rds"))
 
 
-# Save game IDs that have been scraped
+# Save game IDs that have been scraped (or attempted to)
 game_ids_scraped = c(game_ids_previous, game_ids_regular, game_ids_playoffs)
 write(game_ids_scraped, here("./data/game_ids.txt"))
+
+# Save game IDs that failed to scrape
+if(file.exists(here("./data/game_ids_failed.txt"))){
+  game_ids_failed = readLines(here("./data/game_ids_failed.txt"))
+  game_ids_failed = c(game_ids_failed,
+                      game_ids_regular[which(sapply(games_regular, function(x) is.null(x)))],
+                      game_ids_playoffs[which(sapply(games_playoffs, function(x) is.null(x)))])
+  write(game_ids_failed, here("./data/game_ids_failed.txt"))
+} else {
+  game_ids_failed = c(game_ids_regular[which(sapply(games_regular, function(x) is.null(x)))],
+                      game_ids_playoffs[which(sapply(games_playoffs, function(x) is.null(x)))])
+  write(game_ids_failed, here("./data/game_ids_failed.txt"))
+}
 
