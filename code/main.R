@@ -10,6 +10,7 @@
 library(reticulate)
 library(here)
 library(tictoc)
+
 source_python(here("./code/download_data.py")) # Call Python script to use NBA API
 
 # Download data
@@ -51,7 +52,13 @@ for(i in seq_along(game_ids_regular)){
 }
 toc()
 message("Failed to download ", empty_games, " out of ", length(game_ids_regular), " regular season games")
-saveRDS(games_regular, here("./data/games_regular.rds"))
+if(file.exists(here("./data/games_regular.rds"))){
+  games_regular_previous = readRDS(here("./data/games_regular.rds"))
+  games_regular = bind_rows(games_regular_previous, games_regular)
+  saveRDS(games_regular, here("./data/games_regular.rds"))
+} else {
+  saveRDS(games_regular, here("./data/games_regular.rds"))
+}
 
 ## Get play by play for every playoffs game
 empty_games = 0
@@ -71,14 +78,19 @@ for(i in seq_along(game_ids_playoffs)){
 }
 toc()
 message("Failed to download ", empty_games, " out of ", length(game_ids_playoffs), " playoff games")
-saveRDS(games_playoffs, here("./data/games_playoffs.rds"))
+if(file.exists(here("./data/games_playoffs.rds"))){
+  games_regular_previous = readRDS(here("./data/games_playoffs.rds"))
+  games_regular = bind_rows(games_regular_previous, games_regular)
+  saveRDS(games_regular, here("./data/games_playoffs.rds"))
+} else {
+  saveRDS(games_regular, here("./data/games_playoffs.rds"))
+}
 
-
-# Save game IDs that have been scraped (or attempted to)
+## Save game IDs that have been downloaded (or attempted to download)
 game_ids_scraped = c(game_ids_previous, game_ids_regular, game_ids_playoffs)
 write(game_ids_scraped, here("./data/game_ids.txt"))
 
-# Save game IDs that failed to scrape
+## Save game IDs that failed to download
 if(file.exists(here("./data/game_ids_failed.txt"))){
   game_ids_failed = readLines(here("./data/game_ids_failed.txt"))
   game_ids_failed = c(game_ids_failed,
@@ -91,3 +103,16 @@ if(file.exists(here("./data/game_ids_failed.txt"))){
   write(game_ids_failed, here("./data/game_ids_failed.txt"))
 }
 
+source(here("./code/clean_data.R"))
+# Clean data
+games_playoffs = readRDS(here("./data/games_playoffs.rds"))
+tmp = lapply(games_playoffs, clean_data)
+tmp2 = bind_rows(tmp) %>%
+  group_by(time_left, diff) %>%
+  summarize(prob_win = sum(win)/n())
+
+library(plotly)
+plot_ly(x = tmp2$time_left,
+        y = tmp2$diff,
+        z = tmp2$prob_win,
+        type = "heatmap")
