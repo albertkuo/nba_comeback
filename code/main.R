@@ -1,7 +1,7 @@
 # main.R
 # -----------------------------------------------------------------------------
 # Author:             Albert Kuo
-# Date last modified: Nov 1, 2020
+# Date last modified: Nov 4, 2020
 #
 # Main script for analysis
 
@@ -106,13 +106,15 @@ if(file.exists(here("./data/game_ids_failed.txt"))){
 source(here("./code/clean_data.R"))
 # Clean data
 games_playoffs = readRDS(here("./data/games_playoffs.rds"))
-tmp = lapply(games_playoffs, clean_data)
-tmp2 = bind_rows(tmp) %>%
+tic("Clean playoff games")
+games_playoffs_clean = lapply(games_playoffs, clean_data)
+toc()
+games_playoffs_plot = bind_rows(games_playoffs_clean) %>%
   group_by(time_left, diff) %>%
   summarize(prob_win = sum(win)/n())
 
 library(plotly)
-plot_ly(x = tmp2$time_left,
-        y = tmp2$diff,
-        z = tmp2$prob_win,
+plot_ly(x = -games_playoffs_plot$time_left,
+        y = games_playoffs_plot$diff,
+        z = games_playoffs_plot$prob_win,
         type = "heatmap")
