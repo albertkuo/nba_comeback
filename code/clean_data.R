@@ -26,9 +26,18 @@ clean_data = function(df){
              (diff > 0 & winner == "right"),
            diff = -abs(diff))
 
+  # Create quarter column from period
+  df = df %>%
+    mutate(quarter = case_when(period == 1 ~ "1",
+                             period == 2 ~ "2",
+                             period == 3 ~ "3",
+                             period == 4 ~ "4",
+                             period >= 4 ~ "Overtime")) %>%
+    mutate(quarter = factor(quarter, levels = c("1", "2", "3", "4", "Overtime")))
+
   # Select columns
   df = df %>%
-    select(period, minute, second, diff, win)
+    select(quarter, minute, second, diff, win)
 
   return(df)
 }
@@ -37,7 +46,7 @@ clean_data = function(df){
 summarize_data = function(df_ls){
   # Summarize columns at minute/score diff level
   df_summ = bind_rows(df_ls) %>%
-    group_by(period, minute, diff) %>%
+    group_by(quarter, minute, diff) %>%
     summarize(prob_win = sum(win)/n())
 
   # Add symmetric rows
@@ -49,24 +58,18 @@ summarize_data = function(df_ls){
   # Add tie games
   df_summ = bind_rows(df_summ,
                       df_summ %>%
-                        select(period, minute) %>%
+                        select(quarter, minute) %>%
                         distinct() %>%
                         mutate(diff = 0,
                                prob_win = 0.5))
 
   # Add quarter and text
   df_summ = df_summ %>%
-    mutate(quarter = case_when(period == 1 ~ "1",
-                               period == 2 ~ "2",
-                               period == 3 ~ "3",
-                               period == 4 ~ "4",
-                               period >= 4 ~ "Overtime"),
-           text = paste0("Minutes left: ", minute,
+    mutate(text = paste0("Minutes left: ", minute,
                          "\n", "Score margin: ", ifelse(diff > 0,
                                                         paste0("+", diff),
                                                         diff),
-                         "\n", "Probability of win: ", round(prob_win, 2))) %>%
-    mutate(quarter = factor(quarter, levels = c("1", "2", "3", "4", "Overtime")))
+                         "\n", "Probability of win: ", round(prob_win, 2)))
 
   return(df_summ)
 }
