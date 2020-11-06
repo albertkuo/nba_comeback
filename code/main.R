@@ -111,20 +111,24 @@ games_playoffs = readRDS(here("./data/games_playoffs.rds"))
 games_regular = readRDS(here("./data/games_regular.rds"))
 
 ## Clean up columns
-tic("Clean playoff games")
+tic("Clean playoff games") # 20 sec
 games_playoffs_clean = lapply(games_playoffs, clean_data)
 toc()
 saveRDS(games_playoffs_clean, here("./data/games_playoffs_clean.rds"))
 
-tic("Clean regular season games")
+tic("Clean regular season games") # 3 min
 games_regular_clean = lapply(games_regular, clean_data)
 toc()
 saveRDS(games_regular_clean, here("./data/games_regular_clean.rds"))
 
 ## Summarize data
 games_playoffs_summ = summarize_data(games_playoffs_clean)
+games_regular_summ = summarize_data(games_regular_clean)
 
 ## Plot data
 source(here("./code/plot_data.R"))
 p = plot_data(games_playoffs_summ)
+ggplotly(p, tooltip = "text")
+
+p = plot_data(games_regular_summ)
 ggplotly(p, tooltip = "text")
