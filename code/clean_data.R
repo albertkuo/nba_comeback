@@ -6,7 +6,10 @@
 # Clean NBA play-by-play data for analysis
 library(dplyr)
 
+# Clean up play-by-play dataframe
 clean_data = function(df){
+  if(is.null(df)) return(NULL)
+
   # Remove rows where diff = 0
   df = df %>%
     mutate(diff = left_score - right_score) %>%
@@ -42,7 +45,7 @@ clean_data = function(df){
   return(df)
 }
 
-
+# Summarize list of play-by-play dataframes at a minute level/diff level
 summarize_data = function(df_ls){
   # Summarize columns at minute/score diff level
   df_summ = bind_rows(df_ls) %>%
