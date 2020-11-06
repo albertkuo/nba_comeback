@@ -33,7 +33,7 @@ clean_data = function(df){
                                period == 3 ~ "3",
                                period == 4 ~ "4",
                                period >= 4 ~ "4")) %>%
-    mutate(quarter = factor(quarter, levels = c("1", "2", "3", "4", "Overtime")))
+    mutate(quarter = factor(quarter, levels = c("1", "2", "3", "4")))
 
   # Select columns
   df = df %>%
