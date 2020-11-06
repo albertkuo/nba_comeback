@@ -8,7 +8,7 @@ library(ggplot2)
 library(plotly)
 
 plot_data = function(df){
-  p = ggplot(games_playoffs_summ, aes(-minute, diff, fill = prob_win, text = text)) +
+  p = ggplot(df, aes(-minute, diff, fill = prob_win, text = text)) +
     geom_tile() +
     facet_grid(. ~ quarter, scales = "free_x", space = "free_x") +
     scale_x_continuous(breaks = c(seq(-12, 0, by = 2)),
