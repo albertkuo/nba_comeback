@@ -26,15 +26,9 @@ clean_data = function(df){
              (diff > 0 & winner == "right"),
            diff = -abs(diff))
 
-  # Summarize time at minute level (negative time means overtime)
-  df = df %>%
-    mutate(time_left = ifelse(period <= 4,
-                              12*(4 - period) + minute,
-                              -(5*(period - 5) + (5 - minute))))
-
   # Select columns
   df = df %>%
-    select(period, minute, second, time_left, diff, win)
+    select(period, minute, second, diff, win)
 
   return(df)
 }
@@ -43,7 +37,7 @@ clean_data = function(df){
 summarize_data = function(df_ls){
   # Summarize columns at minute/score diff level
   df_summ = bind_rows(df_ls) %>%
-    group_by(period, time_left, diff) %>%
+    group_by(period, minute, diff) %>%
     summarize(prob_win = sum(win)/n())
 
   # Add symmetric rows
@@ -55,7 +49,7 @@ summarize_data = function(df_ls){
   # Add tie games
   df_summ = bind_rows(df_summ,
                       df_summ %>%
-                        select(period, time_left) %>%
+                        select(period, minute) %>%
                         distinct() %>%
                         mutate(diff = 0,
                                prob_win = 0.5))
@@ -67,9 +61,7 @@ summarize_data = function(df_ls){
                                period == 3 ~ "3",
                                period == 4 ~ "4",
                                period >= 4 ~ "Overtime"),
-           text = paste0("Minutes left: ", ifelse(time_left < 0,
-                                                  paste0("+", time_left),
-                                                  time_left),
+           text = paste0("Minutes left: ", minute,
                          "\n", "Score margin: ", ifelse(diff > 0,
                                                         paste0("+", diff),
                                                         diff),
