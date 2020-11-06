@@ -7,15 +7,10 @@
 library(dplyr)
 
 clean_data = function(df){
-  # Remove rows where diff = 0 or
-  # no change in score from previous row (transition between quarters)
+  # Remove rows where diff = 0
   df = df %>%
     mutate(diff = left_score - right_score) %>%
-    filter(diff != 0) %>%
-    mutate(left_score_diff = left_score - lag(left_score),
-           right_score_diff = right_score - lag(right_score)) %>%
-    filter(!(left_score_diff == 0 & right_score_diff == 0)) %>%
-    select(-left_score_diff, -right_score_diff)
+    filter(diff != 0)
 
   # Find out who won (left or right)
   final_diff = df$diff[nrow(df)]
@@ -34,12 +29,40 @@ clean_data = function(df){
   # Summarize time at minute level (negative time means overtime)
   df = df %>%
     mutate(time_left = ifelse(period <= 4,
-                              12*(4 - period) + minute + ceiling(second/60),
-                              -(5*(period - 5) + (5 - minute) - ceiling(second/60))))
+                              12*(4 - period) + minute,
+                              -(5*(period - 5) + (5 - minute))))
 
   # Select columns
   df = df %>%
-    select(time_left, diff, win)
+    select(period, minute, second, time_left, diff, win)
 
   return(df)
+}
+
+
+summarize_data = function(df_ls){
+  # Summarize columns at minute/score diff level
+  df_summ = bind_rows(df_ls) %>%
+    group_by(period, time_left, diff) %>%
+    summarize(prob_win = sum(win)/n())
+
+  # Add symmetric rows
+  df_summ = bind_rows(list(df_summ,
+                           df_summ %>%
+                             mutate(diff = -diff,
+                                    prob_win = 1 - prob_win)))
+
+  # Add quarter and text
+  df_summ = df_summ %>%
+    mutate(quarter = case_when(period == 1 ~ "1",
+                               period == 2 ~ "2",
+                               period == 3 ~ "3",
+                               period == 4 ~ "4",
+                               period >= 4 ~ "Overtime"),
+           text = paste0("Time left: ", time_left,
+                         "\n", "Score diff: ", diff,
+                         "\n", "Probability of win: ", round(prob_win, 2))) %>%
+    mutate(quarter = factor(quarter, levels = c("1", "2", "3", "4", "Overtime")))
+
+  return(df_summ)
 }
