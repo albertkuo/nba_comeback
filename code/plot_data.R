@@ -8,9 +8,9 @@ library(ggplot2)
 library(plotly)
 
 plot_data = function(df){
-  ggplot(games_playoffs_summ, aes(-minute, diff, fill = prob_win, text = text)) +
+  p = ggplot(games_playoffs_summ, aes(-minute, diff, fill = prob_win, text = text)) +
     geom_tile() +
-    facet_wrap(~ quarter, nrow = 1, scales = "free_x") +
+    facet_grid(. ~ quarter, scales = "free_x", space = "free_x") +
     scale_x_continuous(breaks = c(seq(-12, 0, by = 2)),
                        labels = c(seq(12, 0, by = -2))) +
     scale_y_continuous(breaks = seq(-40, 40, by = 5),
@@ -30,4 +30,6 @@ plot_data = function(df){
           panel.border = element_blank(),
           panel.spacing = unit(0, "mm"),
           panel.grid = element_blank())
+
+  return(p)
 }
