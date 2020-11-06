@@ -11,9 +11,9 @@ library(reticulate)
 library(here)
 library(tictoc)
 
+# Download data
 source_python(here("./code/download_data.py")) # Call Python script to use NBA API
 
-# Download data
 ## Get game IDs
 game_ids = get_game_ids() # function in download_data.py
 game_ids_regular = game_ids[[1]]
@@ -103,18 +103,20 @@ if(file.exists(here("./data/game_ids_failed.txt"))){
   write(game_ids_failed, here("./data/game_ids_failed.txt"))
 }
 
-source(here("./code/clean_data.R"))
 # Clean data
+source(here("./code/clean_data.R"))
+
+## Playoff games
 games_playoffs = readRDS(here("./data/games_playoffs.rds"))
+
+## Clean up columns
 tic("Clean playoff games")
 games_playoffs_clean = lapply(games_playoffs, clean_data)
 toc()
-games_playoffs_plot = bind_rows(games_playoffs_clean) %>%
-  group_by(time_left, diff) %>%
-  summarize(prob_win = sum(win)/n())
 
-library(plotly)
-plot_ly(x = -games_playoffs_plot$time_left,
-        y = games_playoffs_plot$diff,
-        z = games_playoffs_plot$prob_win,
-        type = "heatmap")
+## Summarize data
+games_playoffs_summ = summarize_data(games_playoffs_clean)
+
+## Plot data
+p = plot_data(games_playoffs_summ)
+ggplotly(p, tooltip = "text")
