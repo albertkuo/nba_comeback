@@ -106,13 +106,20 @@ if(file.exists(here("./data/game_ids_failed.txt"))){
 # Clean data
 source(here("./code/clean_data.R"))
 
-## Playoff games
+## Read in games
 games_playoffs = readRDS(here("./data/games_playoffs.rds"))
+games_regular = readRDS(here("./data/games_regular.rds"))
 
 ## Clean up columns
 tic("Clean playoff games")
 games_playoffs_clean = lapply(games_playoffs, clean_data)
 toc()
+saveRDS(games_playoffs_clean, here("./data/games_playoffs_clean.rds"))
+
+tic("Clean regular season games")
+games_regular_clean = lapply(games_regular, clean_data)
+toc()
+saveRDS(games_regular_clean, here("./data/games_regular_clean.rds"))
 
 ## Summarize data
 games_playoffs_summ = summarize_data(games_playoffs_clean)
