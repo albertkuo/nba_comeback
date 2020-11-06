@@ -26,13 +26,13 @@ clean_data = function(df){
              (diff > 0 & winner == "right"),
            diff = -abs(diff))
 
-  # Create quarter column from period
+  # Create quarter column from period, merging overtime into the 4th quarter
   df = df %>%
     mutate(quarter = case_when(period == 1 ~ "1",
-                             period == 2 ~ "2",
-                             period == 3 ~ "3",
-                             period == 4 ~ "4",
-                             period >= 4 ~ "Overtime")) %>%
+                               period == 2 ~ "2",
+                               period == 3 ~ "3",
+                               period == 4 ~ "4",
+                               period >= 4 ~ "4")) %>%
     mutate(quarter = factor(quarter, levels = c("1", "2", "3", "4", "Overtime")))
 
   # Select columns
