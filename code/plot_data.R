@@ -18,7 +18,7 @@ plot_data = function(df){
                                   paste0("+", seq(5, 40, by = 5))),
                        limits = c(-40, 40)) +
     scale_fill_gradient2(midpoint = 0.5,
-                         low = "#c13232", mid = "#999999", high = "#56B4E9") +
+                         low = "#d63a3a", mid = "#ffd700", high = "#33aa00") +
     labs(subtitle = "Quarters",
          x = "Minutes left",
          y = "Score margin",
