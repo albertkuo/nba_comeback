@@ -47,10 +47,18 @@ summarize_data = function(df_ls){
     summarize(prob_win = sum(win)/n())
 
   # Add symmetric rows
-  df_summ = bind_rows(list(df_summ,
-                           df_summ %>%
-                             mutate(diff = -diff,
-                                    prob_win = 1 - prob_win)))
+  df_summ = bind_rows(df_summ,
+                      df_summ %>%
+                        mutate(diff = -diff,
+                               prob_win = 1 - prob_win))
+
+  # Add tie games
+  df_summ = bind_rows(df_summ,
+                      df_summ %>%
+                        select(period, time_left) %>%
+                        distinct() %>%
+                        mutate(diff = 0,
+                               prob_win = 0.5))
 
   # Add quarter and text
   df_summ = df_summ %>%
@@ -59,8 +67,12 @@ summarize_data = function(df_ls){
                                period == 3 ~ "3",
                                period == 4 ~ "4",
                                period >= 4 ~ "Overtime"),
-           text = paste0("Time left: ", time_left,
-                         "\n", "Score diff: ", diff,
+           text = paste0("Minutes left: ", ifelse(time_left < 0,
+                                                  paste0("+", time_left),
+                                                  time_left),
+                         "\n", "Score margin: ", ifelse(diff > 0,
+                                                        paste0("+", diff),
+                                                        diff),
                          "\n", "Probability of win: ", round(prob_win, 2))) %>%
     mutate(quarter = factor(quarter, levels = c("1", "2", "3", "4", "Overtime")))
 
