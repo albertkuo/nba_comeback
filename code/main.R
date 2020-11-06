@@ -122,6 +122,9 @@ toc()
 saveRDS(games_regular_clean, here("./data/games_regular_clean.rds"))
 
 ## Summarize data
+games_playoffs_clean = readRDS(here("./data/games_playoffs_clean.rds"))
+games_regular_clean = readRDS(here("./data/games_regular_clean.rds"))
+
 games_playoffs_summ = summarize_data(games_playoffs_clean)
 games_regular_summ = summarize_data(games_regular_clean)
 
