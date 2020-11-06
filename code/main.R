@@ -118,5 +118,6 @@ toc()
 games_playoffs_summ = summarize_data(games_playoffs_clean)
 
 ## Plot data
+source(here("./code/plot_data.R"))
 p = plot_data(games_playoffs_summ)
 ggplotly(p, tooltip = "text")
