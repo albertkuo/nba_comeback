@@ -65,11 +65,9 @@ summarize_data = function(df_ls){
 
   # Add quarter and text
   df_summ = df_summ %>%
-    mutate(text = paste0("Minutes left: ", minute,
-                         "\n", "Score margin: ", ifelse(diff > 0,
-                                                        paste0("+", diff),
-                                                        diff),
-                         "\n", "Probability of win: ", round(prob_win, 2)))
+    mutate(text = paste0(minute, " minutes left in quarter ", quarter,
+                         "\n", "Score margin = ", ifelse(diff > 0, paste0("+", diff), diff),
+                         "\n", "Probability of win = ", round(prob_win, 2)))
 
   return(df_summ)
 }
