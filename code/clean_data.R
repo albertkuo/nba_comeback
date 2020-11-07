@@ -15,6 +15,13 @@ clean_data = function(df){
     mutate(diff = left_score - right_score) %>%
     filter(diff != 0)
 
+  # Remove beginning/end of quarter rows
+  df = df %>%
+    mutate(left_score_diff = left_score - lag(left_score),
+           right_score_diff = right_score - lag(right_score)) %>%
+    filter(!(left_score_diff == 0 & right_score_diff == 0)) %>%
+    select(-left_score_diff, -right_score_diff)
+
   # Find out who won (left or right)
   final_diff = df$diff[nrow(df)]
   if(final_diff > 0){
@@ -78,7 +85,8 @@ summarize_data = function(df_ls){
   df_summ = df_summ %>%
     mutate(text = paste0(minute, " minutes left in quarter ", quarter,
                          "\n", "Score margin = ", ifelse(diff > 0, paste0("+", diff), diff),
-                         "\n", "Probability of win = ", round(prob_win, 2)))
+                         "\n", "Probability of win = ", round(prob_win, 2),
+                         "\n", "Sample size = ", n))
 
   return(df_summ)
 }
