@@ -1,7 +1,7 @@
 # clean_data.R
 # -----------------------------------------------------------------------------
 # Author:             Albert Kuo
-# Date last modified: Nov 4, 2020
+# Date last modified: Nov 7, 2020
 #
 # Clean NBA play-by-play data for analysis
 library(dplyr)
@@ -50,7 +50,9 @@ summarize_data = function(df_ls){
   # Summarize columns at minute/score diff level
   df_summ = bind_rows(df_ls) %>%
     group_by(quarter, minute, diff) %>%
-    summarize(prob_win = sum(win)/n())
+    summarize(prob_win = sum(win)/n(),
+              n = n()) %>%
+    ungroup()
 
   # Add symmetric rows
   df_summ = bind_rows(df_summ,
@@ -63,8 +65,14 @@ summarize_data = function(df_ls){
                       df_summ %>%
                         select(quarter, minute) %>%
                         distinct() %>%
+                        add_row(quarter = as.factor(1), minute = 12) %>% # Add beginning of game
                         mutate(diff = 0,
-                               prob_win = 0.5))
+                               prob_win = 0.5,
+                               n = max(df_summ$n)))
+
+  # Remove 12 minute points (beginning of quarters)
+  df_summ = df_summ %>%
+    filter(minute != 12)
 
   # Add quarter and text
   df_summ = df_summ %>%
