@@ -1,7 +1,7 @@
 # main.R
 # -----------------------------------------------------------------------------
 # Author:             Albert Kuo
-# Date last modified: Nov 4, 2020
+# Date last modified: Nov 8, 2020
 #
 # Main script for analysis
 
@@ -135,3 +135,45 @@ ggplotly(p, tooltip = "text")
 
 p = plot_data(games_regular_summ)
 ggplotly(p, tooltip = "text")
+
+
+# Monotone smoother
+# https://www.rdocumentation.org/packages/fda/versions/5.1.5.1/topics/smooth.monotone
+library(fda)
+tmp = games_regular_summ %>% filter(diff == -5) %>%
+  mutate(time_left = (4-as.numeric(quarter))*12 + minute)
+
+tmp = tmp %>% arrange(time_left)
+x = tmp$time_left
+y = tmp$prob_win
+rng = c(0, 47) # range of x
+
+# b-spline basis
+norder = 6
+n = length(x)
+nbasis = n + norder - 2
+wbasis = create.bspline.basis(rng, nbasis, norder, x)
+
+# starting values for coefficient
+cvec0 = matrix(0, nbasis, 1)
+Wfd0 = fd(cvec0, wbasis)
+
+# set up functional parameter object
+Lfdobj = 3          #  penalize curvature of acceleration
+lambda = 10^(-0.5)  #  smoothing parameter
+growfdPar = fdPar(Wfd0, Lfdobj, lambda)
+wgt = tmp$n         # weight vector = sample size
+
+# smoothed result
+result = smooth.monotone(x, y, growfdPar, wgt,
+                          conv=0.1)
+# coefficients
+Wfd = result$Wfdobj
+beta = result$beta
+y_smooth = beta[1] + beta[2]*eval.monfd(x, Wfd)
+
+# plot the data and the curve
+plot(x, y, type="p")
+lines(x, y_smooth)
+y_smooth =sapply(y_smooth, function(y) min(0.5, y))
+lines(x, y_smooth)
