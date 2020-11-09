@@ -137,10 +137,11 @@ p = plot_data(games_regular_summ)
 ggplotly(p, tooltip = "text")
 
 
-# Monotone smoother
+## Monotone smoother
 # https://www.rdocumentation.org/packages/fda/versions/5.1.5.1/topics/smooth.monotone
 library(fda)
-tmp = games_regular_summ %>% filter(diff == -5) %>%
+score_margin = 5
+tmp = games_playoffs_summ %>% filter(diff == -score_margin) %>%
   mutate(time_left = (4-as.numeric(quarter))*12 + minute)
 
 tmp = tmp %>% arrange(time_left)
@@ -175,5 +176,21 @@ y_smooth = beta[1] + beta[2]*eval.monfd(x, Wfd)
 # plot the data and the curve
 plot(x, y, type="p")
 lines(x, y_smooth)
-y_smooth =sapply(y_smooth, function(y) min(0.5, y))
+y_smooth = sapply(y_smooth, function(y) min(0.5, y))
 lines(x, y_smooth)
+
+
+## Model-based probabilities
+# tic("Find n points left for playoffs") # 20 sec
+# games_playoffs_npoints = lapply(games_playoffs, n_points_left)
+# toc()
+#
+# games_playoffs_npoints = bind_rows(games_playoffs_npoints) %>%
+#   mutate(time_left = (4-as.numeric(quarter))*12 + minute) %>%
+#   group_by(time_left) %>%
+#   summarize(n_points_left = mean(n_points_left))
+# saveRDS(games_playoffs_npoints, here("./data/games_playoffs_npoints.rds"))
+
+
+y_model = sapply(x, function(x) model_prob(x, score_margin))
+lines(x, y_model, col = "red")
