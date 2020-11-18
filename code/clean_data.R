@@ -90,30 +90,3 @@ summarize_data = function(df_ls){
 
   return(df_summ)
 }
-
-# Find number of points left for each row in play-by-play dataframe
-n_points_left = function(df){
-  # Remove beginning/end of quarter rows
-  df = df %>%
-    mutate(left_score_diff = left_score - lag(left_score),
-           right_score_diff = right_score - lag(right_score)) %>%
-    filter(!(left_score_diff == 0 & right_score_diff == 0))%>%
-    select(-left_score_diff, -right_score_diff)
-
-  # Find number of points left to play
-  df = df %>%
-    mutate(n_points_left = (last(left_score) - left_score) +
-             (last(right_score) - right_score)) %>%
-    select(period, minute, n_points_left)
-
-  # Create quarter column from period, merging overtime into the 4th quarter
-  df = df %>%
-    mutate(quarter = case_when(period == 1 ~ "1",
-                               period == 2 ~ "2",
-                               period == 3 ~ "3",
-                               period == 4 ~ "4",
-                               period >= 4 ~ "4")) %>%
-    mutate(quarter = factor(quarter, levels = c("1", "2", "3", "4")))
-
-  return(df)
-}
