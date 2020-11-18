@@ -10,8 +10,9 @@ library(fda)
 
 # Smooth probabilities in the time_left (x) direction
 smooth_time_data = function(df){
+  df = df %>% arrange(time_left)
   if(nrow(df) >= 5){ # Need at least 5 points to attempt smoothing
-    tmp = df %>% arrange(time_left)
+    tmp = df
     x = tmp$time_left
     y = tmp$prob_win
     rng = c(min(x), max(x)) # range of x
@@ -61,9 +62,9 @@ smooth_time_data = function(df){
 
 # Smooth probabilities in the score margin/diff (y) direction
 smooth_margin_data = function(df){
+  df = df %>% arrange(diff)
   if(nrow(df) >= 5){ # Need at least 5 points to attempt smoothing
     tmp = df
-    tmp = tmp %>% arrange(diff)
     x = tmp$diff
     y = tmp$prob_win
     rng = c(min(x), max(x)) # range of x
