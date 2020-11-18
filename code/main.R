@@ -136,49 +136,21 @@ ggplotly(p, tooltip = "text")
 p = plot_data(games_regular_summ)
 ggplotly(p, tooltip = "text")
 
+## Add monotone smoother in both directions
+source(here("./code/smooth_data.R"))
+games_playoffs_smooth = games_playoffs_summ %>% filter(diff < 0)
+tic() # ~1 min
+games_playoffs_smooth = games_playoffs_smooth %>%
+  mutate(time_left = (4-as.numeric(quarter))*12 + minute) %>%
+  group_by(diff) %>%
+  group_modify(~ smooth_time_data(df = .x)) %>%
+  ungroup() %>%
+  group_by(time_left) %>%
+  group_modify(~ smooth_margin_data(df = .x)) %>%
+  mutate(prob_win_smooth = (prob_win_smooth_time + prob_win_smooth_margin)/2)
+toc()
 
-## Monotone smoother
-# https://www.rdocumentation.org/packages/fda/versions/5.1.5.1/topics/smooth.monotone
-library(fda)
-score_margin = 5
-tmp = games_playoffs_summ %>% filter(diff == -score_margin) %>%
-  mutate(time_left = (4-as.numeric(quarter))*12 + minute)
-
-tmp = tmp %>% arrange(time_left)
-x = tmp$time_left
-y = tmp$prob_win
-rng = c(0, 47) # range of x
-
-# b-spline basis
-norder = 6
-n = length(x)
-nbasis = n + norder - 2
-wbasis = create.bspline.basis(rng, nbasis, norder, x)
-
-# starting values for coefficient
-cvec0 = matrix(0, nbasis, 1)
-Wfd0 = fd(cvec0, wbasis)
-
-# set up functional parameter object
-Lfdobj = 3          #  penalize curvature of acceleration
-lambda = 10^(-0.5)  #  smoothing parameter
-growfdPar = fdPar(Wfd0, Lfdobj, lambda)
-wgt = tmp$n         # weight vector = sample size
-
-# smoothed result
-result = smooth.monotone(x, y, growfdPar, wgt,
-                          conv=0.1)
-# coefficients
-Wfd = result$Wfdobj
-beta = result$beta
-y_smooth = beta[1] + beta[2]*eval.monfd(x, Wfd)
-
-# plot the data and the curve
 library(ggplot2)
-plot(x, y, type = "p")
-lines(x, y_smooth)
-y_smooth = sapply(y_smooth, function(y) min(0.5, y))
-lines(x, y_smooth)
 
 ## Model-based probabilities
 source(here("./code/model_data.R"))
