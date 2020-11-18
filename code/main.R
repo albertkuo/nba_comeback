@@ -139,7 +139,7 @@ ggplotly(p, tooltip = "text")
 ## Add monotone smoother in both directions
 source(here("./code/smooth_data.R"))
 games_playoffs_smooth = games_playoffs_summ %>% filter(diff < 0)
-tic() # ~1 min
+tic() # ~2 min, lots of print statements
 games_playoffs_smooth = games_playoffs_smooth %>%
   mutate(time_left = (4-as.numeric(quarter))*12 + minute) %>%
   group_by(diff) %>%
@@ -147,15 +147,16 @@ games_playoffs_smooth = games_playoffs_smooth %>%
   ungroup() %>%
   group_by(time_left) %>%
   group_modify(~ smooth_margin_data(df = .x)) %>%
+  ungroup() %>%
   mutate(prob_win_smooth = (prob_win_smooth_time + prob_win_smooth_margin)/2)
 toc()
+games_playoffs_smooth = symmetrize_data(games_playoffs_smooth)
 
-library(ggplot2)
+plot_data(games_playoffs_smooth %>% mutate(prob_win = prob_win_smooth))
 
 ## Model-based probabilities
 source(here("./code/model_data.R"))
 y_model = sapply(x, function(x) model_prob(x, score_margin))
-
 
 plot_dt = tibble(x = x,
                  y = y,
