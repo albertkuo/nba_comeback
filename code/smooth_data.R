@@ -8,6 +8,22 @@
 # https://www.rdocumentation.org/packages/fda/versions/5.1.5.1/topics/smooth.monotone
 library(fda)
 
+# Smooth all games in both directions
+smooth_data = function(df){
+  df = df %>%
+    filter(diff < 0) %>%
+    mutate(time_left = (4-as.numeric(quarter))*12 + minute) %>%
+    group_by(diff) %>%
+    group_modify(~ smooth_time_data(df = .x)) %>%
+    ungroup() %>%
+    group_by(time_left) %>%
+    group_modify(~ smooth_margin_data(df = .x)) %>%
+    ungroup() %>%
+    mutate(prob_win_smooth = (prob_win_smooth_time + prob_win_smooth_margin)/2)
+
+  return(df)
+}
+
 # Smooth probabilities in the time_left (x) direction
 smooth_time_data = function(df){
   df = df %>% arrange(time_left)
