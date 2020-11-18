@@ -174,23 +174,24 @@ beta = result$beta
 y_smooth = beta[1] + beta[2]*eval.monfd(x, Wfd)
 
 # plot the data and the curve
-plot(x, y, type="p")
+library(ggplot2)
+plot(x, y, type = "p")
 lines(x, y_smooth)
 y_smooth = sapply(y_smooth, function(y) min(0.5, y))
 lines(x, y_smooth)
 
-
 ## Model-based probabilities
-# tic("Find n points left for playoffs") # 20 sec
-# games_playoffs_npoints = lapply(games_playoffs, n_points_left)
-# toc()
-#
-# games_playoffs_npoints = bind_rows(games_playoffs_npoints) %>%
-#   mutate(time_left = (4-as.numeric(quarter))*12 + minute) %>%
-#   group_by(time_left) %>%
-#   summarize(n_points_left = mean(n_points_left))
-# saveRDS(games_playoffs_npoints, here("./data/games_playoffs_npoints.rds"))
-
-
+source(here("./code/model_data.R"))
 y_model = sapply(x, function(x) model_prob(x, score_margin))
-lines(x, y_model, col = "red")
+
+
+plot_dt = tibble(x = x,
+                 y = y,
+                 y_smooth = y_smooth,
+                 y_model = y_model)
+plot_dt %>%
+  ggplot(aes(x = x, y = y)) +
+  geom_point() +
+  geom_line(aes(y = y_smooth), color = "blue") +
+  geom_line(aes(y = y_model), color = "red") +
+  theme_bw()
