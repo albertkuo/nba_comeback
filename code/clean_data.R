@@ -90,3 +90,33 @@ summarize_data = function(df_ls){
 
   return(df_summ)
 }
+
+# Create symmetric probabilities after smoothing
+symmetrize_data = function(df){
+  # Add symmetric rows
+  df = bind_rows(df,
+                 df %>%
+                   mutate(diff = -diff) %>%
+                   mutate_at(vars(starts_with("prob")), list(~.*-1 + 1)))
+
+  # Add tie games
+  df = bind_rows(df,
+                 df %>%
+                   select(quarter, minute) %>%
+                   distinct() %>%
+                   mutate(diff = 0,
+                          prob_win = 0.5,
+                          prob_win_smooth = 0.5,
+                          prob_win_smooth_time = 0.5,
+                          prob_win_smooth_margin = 0.5,
+                          n = max(df$n)))
+
+  # Add quarter and text
+  df = df %>%
+    mutate(text = paste0(minute, " minutes left in quarter ", quarter,
+                         "\n", "Score margin = ", ifelse(diff > 0, paste0("+", diff), diff),
+                         "\n", "Probability of win = ", round(prob_win_smooth, 2),
+                         "\n", "Sample size = ", n))
+
+  return(df)
+}
