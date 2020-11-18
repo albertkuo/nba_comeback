@@ -1,7 +1,7 @@
 # plot_data.R
 # -----------------------------------------------------------------------------
 # Author:             Albert Kuo
-# Date last modified: Nov 7, 2020
+# Date last modified: Nov 18, 2020
 #
 # Plot heatmap
 library(ggplot2)
@@ -12,6 +12,7 @@ quarter_labels = paste("Quarter", 1:4)
 names(quarter_labels) = 1:4
 
 plot_data = function(df){
+  df = df %>% filter(n >= 5)
   # Plot
   p = ggplot(df, aes(x = -minute, y = diff, fill = prob_win, text = text)) +
     geom_raster(aes(alpha = n/(10+n)), hjust = 0) +
@@ -29,8 +30,8 @@ plot_data = function(df){
     scale_fill_gradient2(midpoint = 0.5,
                          low = "#d63a3a", mid = "#ffd700", high = "#33aa00") +
     scale_alpha(guide = F) +
-    labs(x = "Time Left",
-         y = "Score Margin",
+    labs(x = "",
+         y = "",
          fill = "Probability of win") +
     theme_bw() +
     theme(plot.subtitle = element_text(hjust = 0.5),
