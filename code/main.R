@@ -33,40 +33,57 @@ saveRDS(games_regular_clean, here("./data/games_regular_clean.rds"))
 games_playoffs_clean = readRDS(here("./data/games_playoffs_clean.rds"))
 games_regular_clean = readRDS(here("./data/games_regular_clean.rds"))
 
-games_playoffs_summ = summarize_data(games_playoffs_clean)
+games_playoffs_summ = summarize_data(games_playoffs_clean) # ~1 sec
 games_regular_summ = summarize_data(games_regular_clean)
 games_overall_summ = summarize_data(bind_rows(games_playoffs_clean, games_regular_clean))
+
+## Smooth data
+source(here("./code/smooth_data.R"))
+
+games_playoffs_smooth = smooth_data(games_playoffs_summ) # ~2 min, lots of print statements
+games_playoffs_smooth = symmetrize_data(games_playoffs_smooth)
+saveRDS(games_playoffs_smooth, here("./data/games_playoffs_smooth.rds"))
+
+games_regular_smooth = smooth_data(games_regular_summ) # ~3 min
+games_regular_smooth = symmetrize_data(games_regular_smooth)
+saveRDS(games_regular_smooth, here("./data/games_regular_smooth.rds"))
+
+games_overall_smooth = smooth_data(games_overall_summ) # ~3 min
+games_overall_smooth = symmetrize_data(games_overall_smooth)
+saveRDS(games_overall_smooth, here("./data/games_overall_smooth.rds"))
+
+games_playoffs_smooth = readRDS(here("./data/games_playoffs_smooth.rds"))
+games_regular_smooth = readRDS(here("./data/games_regular_smooth.rds"))
+games_overall_smooth = readRDS(here("./data/games_overall_smooth.rds"))
 
 # Plot data
 source(here("./code/plot_data.R"))
 
 ## Plot empirical data
 p = plot_data(games_playoffs_summ)
+saveRDS(p, here("./app/plots/empirical_playoffs.rds"))
 ggplotly(p, tooltip = "text")
 
 p = plot_data(games_regular_summ)
+saveRDS(p, here("./app/plots/empirical_regular.rds"))
 ggplotly(p, tooltip = "text")
 
 p = plot_data(games_overall_summ)
+saveRDS(p, here("./app/plots/empirical_overall.rds"))
 ggplotly(p, tooltip = "text")
 
 ## Plot smoothed data
-source(here("./code/smooth_data.R"))
-games_playoffs_smooth = smooth_data(games_playoffs_summ) # ~2 min, lots of print statements
-games_playoffs_smooth = symmetrize_data(games_playoffs_smooth)
 p = plot_data(games_playoffs_smooth %>% mutate(prob_win = prob_win_smooth))
+saveRDS(p, here("./app/plots/smoothed_playoffs.rds"))
 ggplotly(p, tooltip = "text")
 
-games_regular_smooth = smooth_data(games_regular_summ) # ~3 min
-games_regular_smooth = symmetrize_data(games_regular_smooth)
 p = plot_data(games_regular_smooth %>% mutate(prob_win = prob_win_smooth))
+saveRDS(p, here("./app/plots/smoothed_regular.rds"))
 ggplotly(p, tooltip = "text")
 
-games_overall_smooth = smooth_data(games_overall_summ) # ~3 min
-games_overall_smooth = symmetrize_data(games_overall_smooth)
 p = plot_data(games_overall_smooth %>% mutate(prob_win = prob_win_smooth))
+saveRDS(p, here("./app/plots/smoothed_overall.rds"))
 ggplotly(p, tooltip = "text")
-
 
 ## Plot model-based probabilities (WIP)
 source(here("./code/model_data.R"))
