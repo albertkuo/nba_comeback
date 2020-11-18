@@ -115,8 +115,7 @@ symmetrize_data = function(df){
   df = df %>%
     mutate(text = paste0(minute, " minutes left in quarter ", quarter,
                          "\n", "Score margin = ", ifelse(diff > 0, paste0("+", diff), diff),
-                         "\n", "Probability of win = ", round(prob_win_smooth, 2),
-                         "\n", "Sample size = ", n))
+                         "\n", "Probability of win = ", round(prob_win_smooth, 2)))
 
   return(df)
 }
