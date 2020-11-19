@@ -7,21 +7,25 @@
 
 library(shiny)
 library(shinyWidgets)
+library(shinythemes)
 library(plotly)
 library(here)
 
 # Define UI for application that draws a histogram
-ui <- fluidPage(
+ui <- fluidPage(theme = shinytheme("paper"),
 
     # Application title
-    titlePanel("NBA Comeback"),
+    column(8, offset = 2, align = "center",
+    titlePanel("The NBA Comeback"),
+    h3("Minute-by-minute probabilities of winning an NBA game")
+    ),
 
     fluidRow(
         column(4, offset = 2, align = "left",
         radioGroupButtons(
             inputId = "season_type",
             label = "",
-            choices = c("All", "Regular", "Playoffs"),
+            choices = c("All", "Regular Season", "Playoffs"),
             status = "primary"
         )
         ),
@@ -36,8 +40,12 @@ ui <- fluidPage(
     ),
 
     fluidRow(
-        column(8, offset = 2,
-               plotlyOutput("distPlot", height = 800)
+        column(8, offset = 2, align = "right",
+               plotlyOutput("distPlot", height = 800),
+               p("Probabilities are based on NBA games from 2000-2020. For more details,
+                 click", a("here.",
+                 href="https://blog.albertkuo.me"), "This app was built by", a("Albert Kuo.",
+                                                                                 href="https://albertkuo.me"))
         )
     )
 )
@@ -48,11 +56,11 @@ server <- function(input, output) {
     plot_ls = list()
     empirical_file_ls = list.files(here("./app/plots"), pattern = "empirical*", full.names = T)
     plot_ls[["Data Only"]] = lapply(empirical_file_ls, readRDS)
-    names(plot_ls[["Data Only"]]) = c("All", "Playoffs", "Regular")
+    names(plot_ls[["Data Only"]]) = c("All", "Playoffs", "Regular Season")
 
     smoothed_file_ls = list.files(here("./app/plots"), pattern = "smoothed*", full.names = T)
     plot_ls[["Smoothed Trends"]] = lapply(smoothed_file_ls, readRDS)
-    names(plot_ls[["Smoothed Trends"]]) = c("All", "Playoffs", "Regular")
+    names(plot_ls[["Smoothed Trends"]]) = c("All", "Playoffs", "Regular Season")
 
     # Reactive values
     season_type = reactive(input$season_type)
