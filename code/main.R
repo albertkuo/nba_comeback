@@ -37,6 +37,10 @@ games_playoffs_summ = summarize_data(games_playoffs_clean) # ~1 sec
 games_regular_summ = summarize_data(games_regular_clean)
 games_overall_summ = summarize_data(bind_rows(games_playoffs_clean, games_regular_clean))
 
+saveRDS(games_playoffs_summ, here("./data/games_playoffs_summ.rds"))
+saveRDS(games_regular_summ, here("./data/games_regular_summ.rds"))
+saveRDS(games_overall_summ, here("./data/games_overall_summ.rds"))
+
 ## Smooth data
 source(here("./code/smooth_data.R"))
 
@@ -84,18 +88,3 @@ ggplotly(p, tooltip = "text")
 p = plot_data(games_overall_smooth %>% mutate(prob_win = prob_win_smooth))
 saveRDS(p, here("./app/plots/smoothed_overall.rds"))
 ggplotly(p, tooltip = "text")
-
-## Plot model-based probabilities (WIP)
-source(here("./code/model_data.R"))
-y_model = sapply(x, function(x) model_prob(x, score_margin))
-
-plot_dt = tibble(x = x,
-                 y = y,
-                 y_smooth = y_smooth,
-                 y_model = y_model)
-plot_dt %>%
-  ggplot(aes(x = x, y = y)) +
-  geom_point() +
-  geom_line(aes(y = y_smooth), color = "blue") +
-  geom_line(aes(y = y_model), color = "red") +
-  theme_bw()
