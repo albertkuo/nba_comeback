@@ -12,7 +12,7 @@ library(here)
 library(tictoc)
 
 # Download data
-source(here("./code/clean_data.R"))
+source(here("./code/download_data.R"))
 download_data() # wrapper for Python functions to download game IDs and play-by-play data
 
 # Clean data
