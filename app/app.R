@@ -25,7 +25,7 @@ ui <- fluidPage(theme = shinytheme("paper"),
         radioGroupButtons(
             inputId = "season_type",
             label = "",
-            choices = c("All", "Regular Season", "Playoffs"),
+            choices = c("All Games", "Regular Season", "Playoffs"),
             status = "primary"
         )
         ),
@@ -33,19 +33,21 @@ ui <- fluidPage(theme = shinytheme("paper"),
                radioGroupButtons(
                    inputId = "model",
                    label = "",
-                   choices = c("Data Only", "Smoothed Trends"),
+                   choices = c("Data Only", "Model-based"),
                    status = "primary"
                )
         )
     ),
 
     fluidRow(
-        column(8, offset = 2, align = "right",
-               plotlyOutput("distPlot", height = 800),
-               p("Probabilities are based on NBA games from 2000-2020. For more details,
+        column(8, offset = 2, align = "left",
+               plotlyOutput("distPlot", height = 600),
+               p("Probabilities are calculated as the proportion of times a team has won
+               given a score margin (y-axis) at x minutes into the game (x-axis) using historical
+               data from all NBA games in seasons 2000-2020. Model-based, smoothed probabilities
+               are estimated using a nonparametric model. For more details,
                  click", a("here.",
-                 href="https://blog.albertkuo.me"), "This app was built by", a("Albert Kuo.",
-                                                                                 href="https://albertkuo.me"))
+                 href="https://blog.albertkuo.me"))
         )
     )
 )
@@ -56,11 +58,11 @@ server <- function(input, output) {
     plot_ls = list()
     empirical_file_ls = list.files(here("./app/plots"), pattern = "empirical*", full.names = T)
     plot_ls[["Data Only"]] = lapply(empirical_file_ls, readRDS)
-    names(plot_ls[["Data Only"]]) = c("All", "Playoffs", "Regular Season")
+    names(plot_ls[["Data Only"]]) = c("All Games", "Playoffs", "Regular Season")
 
     smoothed_file_ls = list.files(here("./app/plots"), pattern = "smoothed*", full.names = T)
-    plot_ls[["Smoothed Trends"]] = lapply(smoothed_file_ls, readRDS)
-    names(plot_ls[["Smoothed Trends"]]) = c("All", "Playoffs", "Regular Season")
+    plot_ls[["Model-based"]] = lapply(smoothed_file_ls, readRDS)
+    names(plot_ls[["Model-based"]]) = c("All Games", "Playoffs", "Regular Season")
 
     # Reactive values
     season_type = reactive(input$season_type)
@@ -68,7 +70,7 @@ server <- function(input, output) {
 
     output$distPlot <- renderPlotly({
         plot = plot_ls[[model()]][[season_type()]]
-        print(ggplotly(plot, tooltip = 'text'))
+        print(ggplotly(plot, tooltip = 'text') %>% config(displayModeBar = F))
     })
 }
 
