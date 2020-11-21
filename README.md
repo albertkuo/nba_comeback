@@ -1,5 +1,5 @@
 # nba_comeback
-This is a project where I calculate the minute-by-minute probabilities of a team winning an NBA game given how many points they are down and how many minutes are left in the game. Read more about the project on my blog post [here](https://blog.albertkuo.me/post/probability-of-winning-an-nba-game-a-minute-by-minute-breakdown) or view the Shiny app [here](https://albertkuo.shinyapps.io/nba_comeback/).
+This is a project where I calculate the minute-by-minute probabilities of a team winning an NBA game given how many points they are down and how many minutes are left in the game. Read more about the project on my [blog post](https://blog.albertkuo.me/post/probability-of-winning-an-nba-game-a-minute-by-minute-breakdown) or view the [Shiny app](https://albertkuo.shinyapps.io/nba_comeback/).
 
 ![](./app_screenshot.png)
 
