@@ -46,7 +46,7 @@ ui <- fluidPage(theme = shinytheme("paper"),
                data from all NBA games in seasons 2000-2020. Model-based, smoothed probabilities
                are estimated using a nonparametric model. For more details,
                  click", a("here.",
-                 href="https://blog.albertkuo.me"))
+                 href="https://blog.albertkuo.me/post/probability-of-winning-an-nba-game-a-minute-by-minute-breakdown"))
         )
     )
 )
