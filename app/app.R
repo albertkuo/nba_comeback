@@ -1,7 +1,7 @@
 # app.R
 # -----------------------------------------------------------------------------
 # Author:             Albert Kuo
-# Date last modified: Nov 18, 2020
+# Date last modified: Nov 20, 2020
 #
 # Shiny app for displaying plots
 
@@ -9,7 +9,6 @@ library(shiny)
 library(shinyWidgets)
 library(shinythemes)
 library(plotly)
-library(here)
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(theme = shinytheme("paper"),
@@ -56,11 +55,11 @@ ui <- fluidPage(theme = shinytheme("paper"),
 server <- function(input, output) {
     # Read in ggplots
     plot_ls = list()
-    empirical_file_ls = list.files(here("./app/plots"), pattern = "empirical*", full.names = T)
+    empirical_file_ls = list.files("./plots", pattern = "empirical*", full.names = T)
     plot_ls[["Data Only"]] = lapply(empirical_file_ls, readRDS)
     names(plot_ls[["Data Only"]]) = c("All Games", "Playoffs", "Regular Season")
 
-    smoothed_file_ls = list.files(here("./app/plots"), pattern = "smoothed*", full.names = T)
+    smoothed_file_ls = list.files("./plots", pattern = "smoothed*", full.names = T)
     plot_ls[["Model-based"]] = lapply(smoothed_file_ls, readRDS)
     names(plot_ls[["Model-based"]]) = c("All Games", "Playoffs", "Regular Season")
 
